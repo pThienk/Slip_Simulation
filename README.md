@@ -35,7 +35,7 @@ make <taget_name>
 There are three targets to choose from `slip_sim_sandbox,  slip_sim_cluster, and slip_sim_debug`. You will probabaly don't need the debug version.
 If you are on Campus Cluster, make sure the gcc module is loaded.
 
-If you which to change the C++ compiler for any reason (looking at you, Ethan!), change the right side of `$(CXX) = g++`
+If you wish to change the C++ compiler for any reason (looking at you, Ethan!), change the right side of `$(CXX) = g++`
 in the first line of the Makefile to whatever compiler or specific version you like. Additionally, example .sbatch and autosubmit shell
 file is also included for running the program on Campus Cluster.
 
