@@ -21,7 +21,7 @@
 * -s or --size: Simulation size (number of cells). Default is 1000. Enter as a simple integer.
 * -r or --rate: Simulation strain (driving) rate. Default value 0.0. Enter as a simple float.
 * -d or --disorder: Width of arrest stress distribution. Default value is 0.05. Enter as a simple float.
-* -w or --weakening: Weakening parameter epsilon. Default value is 0.0. Enter as a simple float.
+* -e or --epsilon: Weakening or Strengthening parameter epsilon. Default value is 0.0. Enter as a simple float.
 * -o or --output: Type of file to output received as an int. Default is 0 which is both stress and strain, 1 for stress only, 2 for strain only.  
 *
 * Specific for the Cluster Version
