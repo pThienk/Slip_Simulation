@@ -13,7 +13,10 @@ Here is the list of significant improvements made.
 1) The loop algorithm has been remade to be dramatically more effiecient. This means that the performance disparity increases with
 the number of timesteps and system size. Presently, for MAX_TIME=100000 and AREA=1000, this remade version is about **15 times faster** than the original.
 
-2) The random number engine has been updated from the ancient modified Lagged Fibonacci to the Mersenne Twister.
+2) The system initialization algorithm was remade so that system starts in steady state immediately instead of having to wait, which
+consumes initial timesteps.
+
+3) The random number engine has been updated from the ancient modified Lagged Fibonacci to the Mersenne Twister.
 This *slightly* improves the statistics from the original (see below), as well as efficiency.
 
 Comparing default CCDF plot with timestep=100000
@@ -22,9 +25,9 @@ Comparing default CCDF plot with timestep=100000
 Comparing default CCDF plot with timestep=1000
 ![Preview](examples/showcase_2.png)
 
-3) Added a Makefile (described below) which will automatically take care of building the program on Campus Cluster (and Unix local machine)
+4) Added a Makefile (described below) which will automatically take care of building the program on Campus Cluster (and UNIX local machine)
 
-4) The code has been updated to conform with modern C++20, which improve performance and organization. The code itself is also
+5) The code has been updated to conform with modern C++20 conventions, which improve performance and organization. The code itself is also
 a little better documented now.
 
 ## Building on Campus Cluster and UNIX
@@ -39,7 +42,7 @@ If you are on Campus Cluster, make sure the gcc module is loaded.
 
 If you wish to change the C++ compiler for any reason (looking at you, Ethan!), change the right side of `$(CXX) = g++`
 in the first line of the Makefile to whatever compiler or specific version you like. Additionally, example .sbatch and autosubmit shell
-file is also included for running the program on Campus Cluster.
+file are also included for running the program on Campus Cluster.
 
 ## Creators and Maintainers
 
