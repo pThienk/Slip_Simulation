@@ -6,7 +6,7 @@ This code simulates our slip mean-field model exactly.
 ## Improvements
 
 This new edition revised practically almost all parts of the original, save for the core concept.
-Here is the list of significant improvements made.\
+Here is the list of significant improvements made.
 
 1) The loop algorithm has been remade to be dramatically more effiecient. This means that the performance disparity increases with
 the number of timesteps and system size. Presently, for MAX_TIME=100000 and AREA=1000, this remade version is about **15 times faster** than the original.
@@ -32,8 +32,8 @@ To build the program, simply type
 ```
 make <taget_name>
 ```
-There are three targets to choose from `slip\_sim\_sandbox,  slip\_sim\_cluster, and slip\_sim\_debug`. You will probabaly don't need the debug version.
-If you are on Campus Cluster, make sure the gcc module is loaded.\
+There are three targets to choose from `slip_sim_sandbox,  slip_sim_cluster, and slip_sim_debug`. You will probabaly don't need the debug version.
+If you are on Campus Cluster, make sure the gcc module is loaded.
 
 If you which to change the C++ compiler for any reason (looking at you, Ethan!), change the right side of `$(CXX) = g++`
 in the first line of the Makefile to whatever compiler or specific version you like. Additionally, example .sbatch and autosubmit shell
@@ -41,7 +41,7 @@ file is also included for running the program on Campus Cluster.
 
 ## Creators and Maintainers
 
-This code is a remade version of the original slip simulation by Alan Long, made Jun 20 2019, and modified by Ethan Mullen in 2025.\
+This code is a remade version of the original slip simulation by Alan Long, made Jun 20 2019, and modified by Ethan Mullen in 2025.
 
 The creator, and current maintainer of this version is Punnatorn Thienkingkeaw (Porpun), remade on 2/10/2025.
 Any bugs or problems or questions about the code should be directed at the person named above, or the current project owner, Ethan Mullen.
