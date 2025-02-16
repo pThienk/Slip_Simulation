@@ -5,6 +5,8 @@ This code simulates our slip mean-field model exactly.
 
 ## Improvements
 
+_Note: the weakening parameter argument is now -e for epsilon, to reflect the fact that eps < 0 is strengthening_
+
 This new edition revised practically almost all parts of the original, save for the core concept.
 Here is the list of significant improvements made.
 
