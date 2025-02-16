@@ -48,5 +48,5 @@ Any bugs or problems or questions about the code should be directed at the perso
 
 ## Editing with Visual Studio 2022
 
-Project files for Visual Studio 2022 is included for those who which to edit on Windows. The program can also run on Windows and be debugged
+Project files for Visual Studio 2022 is included for those who wish to edit on Windows. The program can also run on Windows and be debugged
 using Visual Studio standard debugging tools, since no part of the code is system specific. Those on UNIX can safely ignore these files.
