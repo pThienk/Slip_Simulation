@@ -13,7 +13,7 @@ Here is the list of significant improvements made.
 1) The loop algorithm has been remade to be dramatically more effiecient. This means that the performance disparity increases with
 the number of timesteps and system size. Presently, for MAX_TIME=100000 and AREA=1000, this remade version is about **15 times faster** than the original.
 
-2) The system initialization algorithm was remade so that system starts in steady state immediately instead of having to wait, which
+2) The system initialization algorithm was remade so that the system starts in steady state immediately instead of having to wait, which
 consumes initial timesteps.
 
 3) The random number engine has been updated from the ancient modified Lagged Fibonacci to the Mersenne Twister.
@@ -35,9 +35,9 @@ a little better documented now.
 A Makefile is included in this code which will automatically handle the building process, provided you have the gcc toolchain installed.
 To build the program, simply type
 ```
-make <taget_name>
+make <target_name>
 ```
-There are three targets to choose from `slip_sim_sandbox, slip_sim_cluster, and slip_sim_debug`. You will probably don't need the debug version.
+There are three targets to choose from `slip_sim_sandbox, slip_sim_cluster and slip_sim_debug`. You probably won't need the debug version.
 If you are on Campus Cluster, make sure the gcc module is loaded.
 
 If you wish to change the C++ compiler for any reason (looking at you, Ethan!), change the right side of `$(CXX) = g++`
