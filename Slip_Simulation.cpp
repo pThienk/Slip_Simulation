@@ -29,8 +29,8 @@
 * --jobid: Append the SLURM job ID to the end of output files name
 * 
 * It write two files as an output:
-* - stress_s={-s}_r={-r}_d={-d}_w={-w}.txt is the force on the system and consists of comma-spaced doubles.
-* - strain_s={-s}_r={-r}_d={-d}_w={-w}.txt is the strain on the system and consists of comma-spaced doubles.
+* - stress_s={-s}_r={-r}_d={-d}_e={-e}.txt is the force on the system and consists of comma-spaced doubles.
+* - strain_s={-s}_r={-r}_d={-d}_e={-e}.txt is the strain on the system and consists of comma-spaced doubles.
 */
 
 #include "Slip_Simulation.hpp"
@@ -134,21 +134,21 @@ int main(int argc, char** argv) {
 
     if (TASKID == 0) {
         const std::string stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
-            + "_w=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + ".txt";
+            + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + ".txt";
         const  std::string strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
-            + "_w=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + ".txt";
+            + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + ".txt";
     }
     else {
         const std::string stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
-            + "_w=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + "_taskid=" + std::to_string(TASKID) + ".txt";
+            + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + "_taskid=" + std::to_string(TASKID) + ".txt";
         const  std::string strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
-            + "_w=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + "_taskid=" + std::to_string(TASKID) + ".txt";
+            + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + "_taskid=" + std::to_string(TASKID) + ".txt";
     }
 #else
     const std::string stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
-        + "_w=" + std::to_string(EPSILON) + ".txt";
+        + "_e=" + std::to_string(EPSILON) + ".txt";
     const  std::string strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
-        + "_w=" + std::to_string(EPSILON) + ".txt";
+        + "_e=" + std::to_string(EPSILON) + ".txt";
 
 #endif
 
