@@ -204,14 +204,14 @@ int main(int argc, char** argv) {
                 if (delta_t > 0) {
                     delta_t = (time_step + delta_t) > TIME_MAX - 1 ? TIME_MAX - time_step - 1 : delta_t;
                     
-                    time_step += delta_t;
                     for (size_t t = 0; t < delta_t; t++) {
                         total_stress_at_t += (stress_to_fail / delta_t) * AREA;
                         cumulative_total_strain += RATE;
 
                         print_to_file();
-                        time_step++;
                     }
+
+                    time_step += delta_t;
                 }
 
             }
