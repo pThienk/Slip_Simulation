@@ -216,7 +216,7 @@ int main(int argc, char** argv) {
                 }
 
             }
-            else {
+            else { // The case of zero RATE
 
                 cumulative_total_strain += stress_to_fail * MODULUS;
 
