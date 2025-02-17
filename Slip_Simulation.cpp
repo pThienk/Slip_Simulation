@@ -199,20 +199,20 @@ int main(int argc, char** argv) {
 
             // Accumulate stress and strain in non-zero driving rate case
             if (RATE > 0) {
-                uint32_t delta_t = static_cast<uint32_t>(stress_to_fail / (MODULUS * RATE));
+                const uint32_t delta_t = static_cast<uint32_t>(stress_to_fail / (MODULUS * RATE));
 
                 if (delta_t > 0) {
-                    delta_t = (time_step + delta_t) > TIME_MAX - 1 ? TIME_MAX - time_step - 1 : delta_t;
+                    const uint32_t t_to_end = (time_step + delta_t) > TIME_MAX - 1 ? TIME_MAX - time_step - 1 : delta_t;
                     
                     // Slowly loads stress and strain until stress reach the critical value
-                    for (size_t t = 0; t < delta_t; t++) {
+                    for (size_t t = 0; t < t_to_end; t++) {
                         total_stress_at_t += (stress_to_fail / delta_t) * AREA;
                         cumulative_total_strain += RATE;
 
                         print_to_file();
                     }
 
-                    time_step += delta_t;
+                    time_step += t_to_end;
                 }
 
             }
