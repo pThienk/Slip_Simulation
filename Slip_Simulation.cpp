@@ -243,16 +243,17 @@ int main(int argc, char** argv) {
 
             if (stresses[i] >= fail_stress[i]) {
 
-                double lost_stress = (fail_stress[i] - arrest_stress[i]) * wei_rand(mt_engine);
+                // Stress is lost and redistributed randomly via Weibull distribution
+                double lost_stress = (fail_stress[i] - arrest_stress[i]) * wei_rand(mt_engine); 
                 cumulative_total_strain += 1 / static_cast<double>(AREA * AREA);
                 redistributed_stress += lost_stress;
                 stresses[i] -= lost_stress * (1 + CONSV / (AREA - 1));
 
                 if (fail_stress[i] == 1) {
-                    fail_stress[i] = 1 - EPSILON * (1 - arrest_stress[i]);
+                    fail_stress[i] = 1 - EPSILON * (1 - arrest_stress[i]); // Apply weakening or strengthening in the case EPSILON != 0
                 }
 
-                is_failing = true;
+                is_failing = true; // Cells failed! Say that the system is in an avalanche
                 failed_count++;
             }
         }
