@@ -218,12 +218,12 @@ int main(int argc, char** argv) {
             }
             else {
 
-                cumulative_total_strain += stress_to_fail * MODULUS;  
-            }
+                cumulative_total_strain += stress_to_fail * MODULUS;
 
-            // Set the system up for an avalanche
-            for (i = 0; i < AREA; i++) {
-                stresses[i] += stress_to_fail;
+                // Set the system up for an avalanche
+                for (i = 0; i < AREA; i++) {
+                    stresses[i] += stress_to_fail;
+                }
             }
             
         }
