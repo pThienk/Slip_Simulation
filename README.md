@@ -37,7 +37,7 @@ To build the program, simply type
 ```
 make <taget_name>
 ```
-There are three targets to choose from `slip_sim_sandbox,  slip_sim_cluster, and slip_sim_debug`. You will probabaly don't need the debug version.
+There are three targets to choose from `slip_sim_sandbox, slip_sim_cluster, and slip_sim_debug`. You will probably don't need the debug version.
 If you are on Campus Cluster, make sure the gcc module is loaded.
 
 If you wish to change the C++ compiler for any reason (looking at you, Ethan!), change the right side of `$(CXX) = g++`
@@ -53,5 +53,5 @@ Any bugs or problems or questions about the code should be directed at the perso
 
 ## Editing with Visual Studio 2022
 
-Project files for Visual Studio 2022 is included for those who wish to edit on Windows. The program can also run on Windows and be debugged
+Project files for Visual Studio 2022 are included for those who wish to edit on Windows. The program can also run on Windows and be debugged
 using Visual Studio standard debugging tools, since no part of the code is system specific. Those on UNIX can safely ignore these files.
