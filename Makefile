@@ -1,7 +1,7 @@
 CXX = g++
 SOURCES = Slip_Simulation.cpp
 HEADERS = Slip_Simulation.hpp cxxopts.hpp
-CXXFLAGS = -std=c++20 -Wall -Wextra -O2
+CXXFLAGS = -std=c++20 -Wall -O2
 CXXFLAGS_D = -std=c++20 -Wall -Wextra -Werror -O0 -g -pedantic
 
 
