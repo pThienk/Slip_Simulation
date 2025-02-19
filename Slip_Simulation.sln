@@ -7,16 +7,28 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Slip_Simulation", "Slip_Sim
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug_Cluster|x64 = Debug_Cluster|x64
+		Debug_Cluster|x86 = Debug_Cluster|x86
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
+		Release_Cluster|x64 = Release_Cluster|x64
+		Release_Cluster|x86 = Release_Cluster|x86
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5E3B9377-06ED-4FA3-9DC2-1579931B2F77}.Debug_Cluster|x64.ActiveCfg = Debug_Cluster|x64
+		{5E3B9377-06ED-4FA3-9DC2-1579931B2F77}.Debug_Cluster|x64.Build.0 = Debug_Cluster|x64
+		{5E3B9377-06ED-4FA3-9DC2-1579931B2F77}.Debug_Cluster|x86.ActiveCfg = Debug_Cluster|Win32
+		{5E3B9377-06ED-4FA3-9DC2-1579931B2F77}.Debug_Cluster|x86.Build.0 = Debug_Cluster|Win32
 		{5E3B9377-06ED-4FA3-9DC2-1579931B2F77}.Debug|x64.ActiveCfg = Debug|x64
 		{5E3B9377-06ED-4FA3-9DC2-1579931B2F77}.Debug|x64.Build.0 = Debug|x64
 		{5E3B9377-06ED-4FA3-9DC2-1579931B2F77}.Debug|x86.ActiveCfg = Debug|Win32
 		{5E3B9377-06ED-4FA3-9DC2-1579931B2F77}.Debug|x86.Build.0 = Debug|Win32
+		{5E3B9377-06ED-4FA3-9DC2-1579931B2F77}.Release_Cluster|x64.ActiveCfg = Release_Cluster|x64
+		{5E3B9377-06ED-4FA3-9DC2-1579931B2F77}.Release_Cluster|x64.Build.0 = Release_Cluster|x64
+		{5E3B9377-06ED-4FA3-9DC2-1579931B2F77}.Release_Cluster|x86.ActiveCfg = Release_Cluster|Win32
+		{5E3B9377-06ED-4FA3-9DC2-1579931B2F77}.Release_Cluster|x86.Build.0 = Release_Cluster|Win32
 		{5E3B9377-06ED-4FA3-9DC2-1579931B2F77}.Release|x64.ActiveCfg = Release|x64
 		{5E3B9377-06ED-4FA3-9DC2-1579931B2F77}.Release|x64.Build.0 = Release|x64
 		{5E3B9377-06ED-4FA3-9DC2-1579931B2F77}.Release|x86.ActiveCfg = Release|Win32
