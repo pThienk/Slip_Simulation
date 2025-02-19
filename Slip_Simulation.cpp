@@ -129,25 +129,28 @@ int main(int argc, char** argv) {
     const int TASKID = result["taskid"].as<int>();
 #endif
 
-// File names
+    // File names
+    std::string stress_filename;
+    std::string strain_filename;
+
 #ifdef CLUSTER_BUILD
 
     if (TASKID == 0) {
-        const std::string stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
+        stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
             + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + ".txt";
-        const  std::string strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
+        strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
             + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + ".txt";
     }
     else {
-        const std::string stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
+        stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
             + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + "_taskid=" + std::to_string(TASKID) + ".txt";
-        const  std::string strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
+        strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
             + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + "_taskid=" + std::to_string(TASKID) + ".txt";
     }
 #else
-    const std::string stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
+    stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
         + "_e=" + std::to_string(EPSILON) + ".txt";
-    const  std::string strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
+    strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
         + "_e=" + std::to_string(EPSILON) + ".txt";
 
 #endif
