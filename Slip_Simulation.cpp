@@ -195,7 +195,7 @@ int main(int argc, char** argv) {
 
             // Get minimum stress to fail
             for (i = 0; i < AREA; i++) {
-                if (stress_to_fail > fail_stress[i] - stresses[i]) {
+                if ((stress_to_fail > fail_stress[i] - stresses[i]) && (fail_stress[i] - stresses[i] > 0)) {
                     stress_to_fail = fail_stress[i] - stresses[i];
                 }
             }
