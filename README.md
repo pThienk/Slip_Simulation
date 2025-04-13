@@ -3,6 +3,11 @@
 C++ source code for the remade "Slip Simulation" program, in service of the Dahmen Research Group's Avalanche Initiative.
 This code simulates our slip mean-field model exactly.
 
+## Exponentially Weakening Model
+
+This branch of the code implements recursively weakening fail stress. This version is modified specifically for the flow stress research,
+any standard application of the model should use the master branch.
+
 ## Improvements
 
 _Note: the weakening parameter argument is now -e for epsilon, to reflect the fact that eps < 0 is strengthening_

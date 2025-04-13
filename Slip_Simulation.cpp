@@ -253,9 +253,10 @@ int main(int argc, char** argv) {
                 redistributed_stress += lost_stress;
                 stresses[i] -= lost_stress * (1 + CONSV / (AREA - 1));
 
-                if (fail_stress[i] == 1) {
-                    fail_stress[i] = 1 - EPSILON * (1 - arrest_stress[i]); // Apply weakening or strengthening in the case EPSILON != 0
-                }
+               // The epsilon is applied recursively to the fail stress every time each cell fails in this case
+               // It is only restored when the system stops failing
+                fail_stress[i] = fail_stress[i] - EPSILON * (fail_stress[i] - arrest_stress[i]); // Apply weakening or strengthening in the case EPSILON != 0
+
 
                 is_failing = true; // Cells failed! Say that the system is in an avalanche
                 failed_count++;
