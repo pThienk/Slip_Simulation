@@ -20,7 +20,7 @@
 * -t or --time: Simulation timesteps. Default is 1000. Enter as a simple integer, i.e., 100000 instead of 1e6 or 100,000.
 * -s or --size: Simulation size (number of cells). Default is 1000. Enter as a simple integer.
 * -r or --rate: Simulation strain (driving) rate. Default value 0.0. Enter as a simple float.
-* -d or --disorder: Width of arrest stress distribution. Default value is 0.05. Enter as a simple float.
+* -d or --decay: Constant DECAY_FACTOR in the exponential weakening model, which accepts values between -1 and 1. Default value is 0.0 which means decaying down arrest stress.
 * -e or --epsilon: Weakening or Strengthening parameter epsilon. Default value is 0.0. Enter as a simple float.
 * -o or --output: Type of file to output received as an int. Default is 0 which is both stress and strain, 1 for stress only, 2 for strain only.  
 *
@@ -31,6 +31,10 @@
 * It write two files as an output:
 * - stress_s={-s}_r={-r}_d={-d}_e={-e}.txt is the force on the system and consists of comma-spaced doubles.
 * - strain_s={-s}_r={-r}_d={-d}_e={-e}.txt is the strain on the system and consists of comma-spaced doubles.
+*/
+
+/*
+* ATTENTION!: The option -d in this case refers to the constant DECAY_FACTOR in the exponential weakening model.
 */
 
 #include "Slip_Simulation.hpp"
@@ -80,6 +84,7 @@ int main(int argc, char** argv) {
     constexpr double K = 18.0; // Weibull distribution shape parameter
     const double LAMBDA = 1 / tgamma(1 + 1 / K); // Weibull distribution scale parameter
     constexpr double MODULUS = 0.001; // Elastic shear modulus of the system (J)
+    constexpr double MAX_FAIL_STRESS = 1.0;
 
     cxxopts::Options options{ "Slip_Simulation", "A simple model simulation of slip-type avalanches." };
     
@@ -89,7 +94,7 @@ int main(int argc, char** argv) {
         ("t,time", "Simulation timesteps", cxxopts::value<uint32_t>()->default_value("1000"))
         ("s,size", "Simulation size (num of cells)", cxxopts::value<uint32_t>()->default_value("1000"))
         ("r,rate", "Strain rate", cxxopts::value<double>()->default_value("0.0"))
-        ("d,disorder", "Disorder width", cxxopts::value<double>()->default_value("0.05"))
+        ("d,decay", "Decay threshold for exponential weakening", cxxopts::value<double>()->default_value("0.0"))
         ("e,epsilon", "Epsilon (Weakening, Strengthing)", cxxopts::value<double>()->default_value("0.0"))
         ("o,output", "Type of file to print out (defaults to BOTH)", cxxopts::value<int>()->default_value("0"))
         ("jobid", "Job (array) ID", cxxopts::value<int>()->default_value("0"))
@@ -99,7 +104,7 @@ int main(int argc, char** argv) {
         ("t,time", "Simulation timesteps", cxxopts::value<uint32_t>()->default_value("1000"))
         ("s,size", "Simulation size (num of cells)", cxxopts::value<uint32_t>()->default_value("1000"))
         ("r,rate", "Strain rate", cxxopts::value<double>()->default_value("0.0"))
-        ("d,disorder", "Disorder width", cxxopts::value<double>()->default_value("0.05"))
+        ("d,decay", "Decay factor for exponential weakening", cxxopts::value<double>()->default_value("0.0"))
         ("e,epsilon", "Epsilon (Weakening, Strengthing)", cxxopts::value<double>()->default_value("0.0"))
         ("o,output", "Type of file to print out (defaults to BOTH)", cxxopts::value<int>()->default_value("0"));
 #endif
@@ -109,7 +114,7 @@ int main(int argc, char** argv) {
     const uint32_t TIME_MAX = result["time"].as<uint32_t>(); // Max simulation timestep
     const uint32_t AREA = result["size"].as<uint32_t>(); // Total size of the system
     const double RATE = result["rate"].as<double>(); // Driving rate in the case of moving boundary condition
-    const double DISORDER = result["disorder"].as<double>(); // Stress redistribution fluctuation rate
+    const double DECAY_FACTOR = result["decay"].as<double>(); // Stress redistribution fluctuation rate
     const double EPSILON = result["epsilon"].as<double>(); // Weakening (1 > eps > 0) or Strengthing (-1 < eps < 0) tuning parameter
     const double CONSV = 1 - 1 / sqrt(AREA); // Conservation rate of the system
     
@@ -136,21 +141,21 @@ int main(int argc, char** argv) {
 #ifdef CLUSTER_BUILD
 
     if (TASKID == 0) {
-        stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
+        stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DECAY_FACTOR)
             + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + ".txt";
-        strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
+        strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DECAY_FACTOR)
             + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + ".txt";
     }
     else {
-        stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
+        stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DECAY_FACTOR)
             + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + "_taskid=" + std::to_string(TASKID) + ".txt";
-        strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
+        strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DECAY_FACTOR)
             + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + "_taskid=" + std::to_string(TASKID) + ".txt";
     }
 #else
-    stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
+    stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DECAY_FACTOR)
         + "_e=" + std::to_string(EPSILON) + ".txt";
-    strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
+    strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DECAY_FACTOR)
         + "_e=" + std::to_string(EPSILON) + ".txt";
 
 #endif
@@ -169,6 +174,7 @@ int main(int argc, char** argv) {
     double* stresses = new double[AREA];
     double* fail_stress = new double[AREA];
     double* arrest_stress = new double[AREA];
+    double* decay_threshold = new double[AREA];
 
     uint32_t i = 0; // Universal index
     bool is_failing = false; // Boolean that is true if the system is in an avalanche, false otherwise
@@ -176,6 +182,14 @@ int main(int argc, char** argv) {
     // Initializing the system
     for (i = 0; i < AREA; i++) {
         arrest_stress[i] = 0.1 * uni_rand(mt_engine) - 0.05;
+
+        // If DECAY_FACTOR > 0, the decay_threshold is EPSILON dependent, else it only depend on the DECAY_FACTOR
+        if (DECAY_FACTOR >= 0) {
+            decay_threshold[i] = DECAY_FACTOR * (1 - EPSILON) * (MAX_FAIL_STRESS - arrest_stress[i]) + arrest_stress[i];
+        }
+        else {
+            decay_threshold[i] = -DECAY_FACTOR * (MAX_FAIL_STRESS - arrest_stress[i]) + arrest_stress[i];
+        }
         fail_stress[i] = 1;
         // This distribution is an approximation of the steady state distribution
         stresses[i] = (1.56585 * pow(i / static_cast<double>(AREA), 0.4) - 0.56585) * (fail_stress[i] - arrest_stress[i]) + arrest_stress[i];
@@ -237,9 +251,7 @@ int main(int argc, char** argv) {
 
         // This is the cell failure and redistribution mechanism
 //-----------------------------------------------------------------------------
-
-        // POSSIBLE FUTURE TODO: Add option for uniform random that use DISORDER parameter
- 
+        
         // Test for failure and update the appropriate attributes
         for (i = 0; i < AREA; i++) {
 
@@ -255,7 +267,7 @@ int main(int argc, char** argv) {
 
                // The epsilon is applied recursively to the fail stress every time each cell fails in this case
                // It is only restored when the system stops failing
-                fail_stress[i] = fail_stress[i] - EPSILON * (fail_stress[i] - arrest_stress[i]); // Apply weakening or strengthening in the case EPSILON != 0
+                fail_stress[i] = fail_stress[i] - EPSILON * (fail_stress[i] - decay_threshold[i]); // Apply weakening or strengthening in the case EPSILON != 0
 
 
                 is_failing = true; // Cells failed! Say that the system is in an avalanche
@@ -291,6 +303,7 @@ int main(int argc, char** argv) {
     delete[] stresses;
     delete[] fail_stress;
     delete[] arrest_stress;
+    delete[] decay_threshold;
 }
 
 /*
