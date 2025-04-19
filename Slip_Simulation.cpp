@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
         ("t,time", "Simulation timesteps", cxxopts::value<uint32_t>()->default_value("1000"))
         ("s,size", "Simulation size (num of cells)", cxxopts::value<uint32_t>()->default_value("1000"))
         ("r,rate", "Strain rate", cxxopts::value<double>()->default_value("0.0"))
-        ("d,decay", "Decay threshold for exponential weakening", cxxopts::value<double>()->default_value("0.0"))
+        ("d,decay", "Decay factor for exponential weakening", cxxopts::value<double>()->default_value("0.0"))
         ("e,epsilon", "Epsilon (Weakening, Strengthing)", cxxopts::value<double>()->default_value("0.0"))
         ("o,output", "Type of file to print out (defaults to BOTH)", cxxopts::value<int>()->default_value("0"))
         ("jobid", "Job (array) ID", cxxopts::value<int>()->default_value("0"))
