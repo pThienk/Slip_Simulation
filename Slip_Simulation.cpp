@@ -13,14 +13,14 @@
 * (2) Area (int) is the system size (in cells). Default is 1000.
 * (3) consv (double) is the conservation parameter c.
 * (4) rate (double) is the strain rate, set to 0 for an adiabatic system.
-* (5) d (double) is the spread of arrest stresses with failure stress normalized to 1.
+* (5) f (double) is the fraction of the system size that experiences weakening.
 * (6) epsilon (double) is the weakening parameter epsilon.
 *
 * Command line arguments that can be passed in any order:
 * -t or --time: Simulation timesteps. Default is 1000. Enter as a simple integer, i.e., 100000 instead of 1e6 or 100,000.
 * -s or --size: Simulation size (number of cells). Default is 1000. Enter as a simple integer.
 * -r or --rate: Simulation strain (driving) rate. Default value 0.0. Enter as a simple float.
-* -d or --disorder: Width of arrest stress distribution. Default value is 0.05. Enter as a simple float.
+* -f or --fraction: Fraction of the system size that experiences weakening. Default value is 1.0. Excepts values in the range [1.0, 0.0].
 * -e or --epsilon: Weakening or Strengthening parameter epsilon. Default value is 0.0. Enter as a simple float.
 * -o or --output: Type of file to output received as an int. Default is 0 which is both stress and strain, 1 for stress only, 2 for strain only.  
 *
@@ -29,18 +29,21 @@
 * --jobid: Append the SLURM job ID to the end of output files name
 * 
 * It write two files as an output:
-* - stress_s={-s}_r={-r}_d={-d}_e={-e}.txt is the force on the system and consists of comma-spaced doubles.
-* - strain_s={-s}_r={-r}_d={-d}_e={-e}.txt is the strain on the system and consists of comma-spaced doubles.
+* - stress_s={-s}_r={-r}_f={-f}_e={-e}.txt is the force on the system and consists of comma-spaced doubles.
+* - strain_s={-s}_r={-r}_f={-f}_e={-e}.txt is the strain on the system and consists of comma-spaced doubles.
 */
 
 #include "Slip_Simulation.hpp"
 
 // Mersenne Twister Random Engine Seed 
 const static int RAND_SEED = 314159;
+const static int RAND_SEED_FAIL = 271828;
 
 // Declares all randomizer objects
-static std::mt19937_64 mt_engine{RAND_SEED};
+static std::mt19937_64 mt_engine{ RAND_SEED };
+static std::mt19937_64 mt_engine_fail{ RAND_SEED_FAIL };
 static std::uniform_real_distribution<> uni_rand{0, 1};
+static std::uniform_int_distribution<> uni_int_rand;
 static std::weibull_distribution<> wei_rand;
 
 // Declares all global scope variables
@@ -89,7 +92,7 @@ int main(int argc, char** argv) {
         ("t,time", "Simulation timesteps", cxxopts::value<uint32_t>()->default_value("1000"))
         ("s,size", "Simulation size (num of cells)", cxxopts::value<uint32_t>()->default_value("1000"))
         ("r,rate", "Strain rate", cxxopts::value<double>()->default_value("0.0"))
-        ("d,disorder", "Disorder width", cxxopts::value<double>()->default_value("0.05"))
+        ("f,fraction", "Fraction of the system that should fail", cxxopts::value<double>()->default_value("1.0"))
         ("e,epsilon", "Epsilon (Weakening, Strengthing)", cxxopts::value<double>()->default_value("0.0"))
         ("o,output", "Type of file to print out (defaults to BOTH)", cxxopts::value<int>()->default_value("0"))
         ("jobid", "Job (array) ID", cxxopts::value<int>()->default_value("0"))
@@ -99,7 +102,7 @@ int main(int argc, char** argv) {
         ("t,time", "Simulation timesteps", cxxopts::value<uint32_t>()->default_value("1000"))
         ("s,size", "Simulation size (num of cells)", cxxopts::value<uint32_t>()->default_value("1000"))
         ("r,rate", "Strain rate", cxxopts::value<double>()->default_value("0.0"))
-        ("d,disorder", "Disorder width", cxxopts::value<double>()->default_value("0.05"))
+        ("f,fraction", "Fraction of the system that should fail", cxxopts::value<double>()->default_value("1.0"))
         ("e,epsilon", "Epsilon (Weakening, Strengthing)", cxxopts::value<double>()->default_value("0.0"))
         ("o,output", "Type of file to print out (defaults to BOTH)", cxxopts::value<int>()->default_value("0"));
 #endif
@@ -109,9 +112,11 @@ int main(int argc, char** argv) {
     const uint32_t TIME_MAX = result["time"].as<uint32_t>(); // Max simulation timestep
     const uint32_t AREA = result["size"].as<uint32_t>(); // Total size of the system
     const double RATE = result["rate"].as<double>(); // Driving rate in the case of moving boundary condition
-    const double DISORDER = result["disorder"].as<double>(); // Stress redistribution fluctuation rate
+    const double FRACTION = result["fraction"].as<double>(); // Stress redistribution fluctuation rate
     const double EPSILON = result["epsilon"].as<double>(); // Weakening (1 > eps > 0) or Strengthing (-1 < eps < 0) tuning parameter
     const double CONSV = 1 - 1 / sqrt(AREA); // Conservation rate of the system
+
+    const uint32_t CELL_FAIL_NUMBER = static_cast<uint32_t>(round(FRACTION*AREA));
     
     // Select file type
     if (result["output"].as<int>() == 1) {
@@ -136,26 +141,27 @@ int main(int argc, char** argv) {
 #ifdef CLUSTER_BUILD
 
     if (TASKID == 0) {
-        stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
+        stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_f=" + std::to_string(FRACTION)
             + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + ".txt";
-        strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
+        strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_f=" + std::to_string(FRACTION)
             + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + ".txt";
     }
     else {
-        stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
+        stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_f=" + std::to_string(FRACTION)
             + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + "_taskid=" + std::to_string(TASKID) + ".txt";
-        strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
+        strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_f=" + std::to_string(FRACTION)
             + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + "_taskid=" + std::to_string(TASKID) + ".txt";
     }
 #else
-    stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
+    stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_f=" + std::to_string(FRACTION)
         + "_e=" + std::to_string(EPSILON) + ".txt";
-    strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_d=" + std::to_string(DISORDER)
+    strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_f=" + std::to_string(FRACTION)
         + "_e=" + std::to_string(EPSILON) + ".txt";
 
 #endif
 
     wei_rand = std::weibull_distribution<>{ K, LAMBDA };
+    uni_int_rand = std::uniform_int_distribution<>{ 0, static_cast<int>(AREA - 1) };
 
     // Output streams, create file if not existed, replace if existed
     stress_file = std::ofstream{ stress_filename, std::ios::out };
@@ -170,6 +176,8 @@ int main(int argc, char** argv) {
     double* fail_stress = new double[AREA];
     double* arrest_stress = new double[AREA];
 
+    bool* fail_cells = new bool[AREA];
+
     uint32_t i = 0; // Universal index
     bool is_failing = false; // Boolean that is true if the system is in an avalanche, false otherwise
 
@@ -177,6 +185,14 @@ int main(int argc, char** argv) {
     for (i = 0; i < AREA; i++) {
         arrest_stress[i] = 0.1 * uni_rand(mt_engine) - 0.05;
         fail_stress[i] = 1;
+
+        // Randomly selecting cells to fail
+        if (i < CELL_FAIL_NUMBER) {
+            fail_cells[uni_int_rand(mt_engine_fail)] = true;
+        }
+        if (&fail_cells[i] == nullptr) {
+            fail_cells[i] = false;
+        }
         // This distribution is an approximation of the steady state distribution
         stresses[i] = (1.56585 * pow(i / static_cast<double>(AREA), 0.4) - 0.56585) * (fail_stress[i] - arrest_stress[i]) + arrest_stress[i];
         total_stress_at_t += stresses[i];
@@ -238,8 +254,6 @@ int main(int argc, char** argv) {
         // This is the cell failure and redistribution mechanism
 //-----------------------------------------------------------------------------
 
-        // POSSIBLE FUTURE TODO: Add option for uniform random that use DISORDER parameter
- 
         // Test for failure and update the appropriate attributes
         for (i = 0; i < AREA; i++) {
 
@@ -253,7 +267,7 @@ int main(int argc, char** argv) {
                 redistributed_stress += lost_stress;
                 stresses[i] -= lost_stress * (1 + CONSV / (AREA - 1));
 
-                if (fail_stress[i] == 1) {
+                if (fail_cells[i] && fail_stress[i] == 1) {
                     fail_stress[i] = 1 - EPSILON * (1 - arrest_stress[i]); // Apply weakening or strengthening in the case EPSILON != 0
                 }
 
@@ -290,6 +304,7 @@ int main(int argc, char** argv) {
     delete[] stresses;
     delete[] fail_stress;
     delete[] arrest_stress;
+    delete[] fail_cells;
 }
 
 /*

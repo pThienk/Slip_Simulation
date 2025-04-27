@@ -3,6 +3,10 @@
 C++ source code for the remade "Slip Simulation" program, in service of the Dahmen Research Group's Avalanche Initiative.
 This code simulates our slip mean-field model exactly.
 
+## Partial Weakening
+
+This branch simulates the partial weakening model where only a fraction of the system size experiences the weakening effect.
+
 ## Improvements
 
 _Note: the weakening parameter argument is now -e for epsilon, to reflect the fact that eps < 0 is strengthening_
