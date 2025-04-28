@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
     double* fail_stress = new double[AREA];
     double* arrest_stress = new double[AREA];
 
-    bool* fail_cells = new bool[AREA];
+    bool* fail_cells = new bool[AREA]();
 
     uint32_t i = 0; // Universal index
     bool is_failing = false; // Boolean that is true if the system is in an avalanche, false otherwise
@@ -190,9 +190,7 @@ int main(int argc, char** argv) {
         if (i < CELL_FAIL_NUMBER) {
             fail_cells[uni_int_rand(mt_engine_fail)] = true;
         }
-        if (&fail_cells[i] == nullptr) {
-            fail_cells[i] = false;
-        }
+     
         // This distribution is an approximation of the steady state distribution
         stresses[i] = (1.56585 * pow(i / static_cast<double>(AREA), 0.4) - 0.56585) * (fail_stress[i] - arrest_stress[i]) + arrest_stress[i];
         total_stress_at_t += stresses[i];
