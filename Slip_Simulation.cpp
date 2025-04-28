@@ -20,7 +20,7 @@
 * -t or --time: Simulation timesteps. Default is 1000. Enter as a simple integer, i.e., 100000 instead of 1e6 or 100,000.
 * -s or --size: Simulation size (number of cells). Default is 1000. Enter as a simple integer.
 * -r or --rate: Simulation strain (driving) rate. Default value 0.0. Enter as a simple float.
-* -f or --fraction: Fraction of the system size that experiences weakening. Default value is 1.0. Excepts values in the range [1.0, 0.0].
+* -f or --fraction: Fraction of the system size that experiences weakening. Default value is 1.0. Accepts any floating-point bigger than or equal 0.0.
 * -e or --epsilon: Weakening or Strengthening parameter epsilon. Default value is 0.0. Enter as a simple float.
 * -o or --output: Type of file to output received as an int. Default is 0 which is both stress and strain, 1 for stress only, 2 for strain only.  
 *
