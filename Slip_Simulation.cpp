@@ -20,7 +20,7 @@
 * -t or --time: Simulation timesteps. Default is 1000. Enter as a simple integer, i.e., 100000 instead of 1e6 or 100,000.
 * -s or --size: Simulation size (number of cells). Default is 1000. Enter as a simple integer.
 * -r or --rate: Simulation strain (driving) rate. Default value 0.0. Enter as a simple float.
-* -f or --fraction: Fraction of the system size that experiences weakening. Default value is 1.0. Accepts any floating-point bigger than or equal 0.0.
+* -f or --fraction: Fraction of the system size that experiences weakening. Default value is 0.0. Accepts any floating-point bigger than or equal 0.0 and the special value -1 for normal weakening.
 * -e or --epsilon: Weakening or Strengthening parameter epsilon. Default value is 0.0. Enter as a simple float.
 * -o or --output: Type of file to output received as an int. Default is 0 which is both stress and strain, 1 for stress only, 2 for strain only.  
 *
@@ -51,9 +51,13 @@ static uint32_t time_step = 0;
 static double total_stress_at_t = 0;
 static double cumulative_total_strain = 0;
 
+// Number of cells failed in a timestep
+static int failed_count = 0; 
+
 // Declares file objects
 static std::ofstream stress_file;
 static std::ofstream strain_file;
+static std::ofstream fail_trace_file;
 
 // Variable for storing output file option
 static PRINT_TYPE print_option = PRINT_TYPE::BOTH;
@@ -69,6 +73,9 @@ inline void print_to_file() {
     }
     else if (print_option == PRINT_TYPE::STRAIN_ONLY) {
         strain_file << std::fixed << std::setprecision(6) << cumulative_total_strain << std::endl;
+    }
+    else if (print_option == PRINT_TYPE::FAIL_TRACE) {
+        fail_trace_file << failed_count << std::endl;
     }
     else {
         stress_file << std::fixed << std::setprecision(6) << total_stress_at_t << std::endl;
@@ -92,7 +99,7 @@ int main(int argc, char** argv) {
         ("t,time", "Simulation timesteps", cxxopts::value<uint32_t>()->default_value("1000"))
         ("s,size", "Simulation size (num of cells)", cxxopts::value<uint32_t>()->default_value("1000"))
         ("r,rate", "Strain rate", cxxopts::value<double>()->default_value("0.0"))
-        ("f,fraction", "Fraction of the system that should fail", cxxopts::value<double>()->default_value("1.0"))
+        ("f,fraction", "Fraction of the system that should fail", cxxopts::value<double>()->default_value("0.0"))
         ("e,epsilon", "Epsilon (Weakening, Strengthing)", cxxopts::value<double>()->default_value("0.0"))
         ("o,output", "Type of file to print out (defaults to BOTH)", cxxopts::value<int>()->default_value("0"))
         ("jobid", "Job (array) ID", cxxopts::value<int>()->default_value("0"))
@@ -102,7 +109,7 @@ int main(int argc, char** argv) {
         ("t,time", "Simulation timesteps", cxxopts::value<uint32_t>()->default_value("1000"))
         ("s,size", "Simulation size (num of cells)", cxxopts::value<uint32_t>()->default_value("1000"))
         ("r,rate", "Strain rate", cxxopts::value<double>()->default_value("0.0"))
-        ("f,fraction", "Fraction of the system that should fail", cxxopts::value<double>()->default_value("1.0"))
+        ("f,fraction", "Fraction of the system that should fail", cxxopts::value<double>()->default_value("0.0"))
         ("e,epsilon", "Epsilon (Weakening, Strengthing)", cxxopts::value<double>()->default_value("0.0"))
         ("o,output", "Type of file to print out (defaults to BOTH)", cxxopts::value<int>()->default_value("0"));
 #endif
@@ -116,7 +123,10 @@ int main(int argc, char** argv) {
     const double EPSILON = result["epsilon"].as<double>(); // Weakening (1 > eps > 0) or Strengthing (-1 < eps < 0) tuning parameter
     const double CONSV = 1 - 1 / sqrt(AREA); // Conservation rate of the system
 
-    const uint32_t CELL_FAIL_NUMBER = static_cast<uint32_t>(round(FRACTION*AREA));
+    uint32_t cell_fail_number = 0;
+    if (FRACTION > 0) {
+        cell_fail_number = static_cast<uint32_t>(round(FRACTION * AREA));
+    }
     
     // Select file type
     if (result["output"].as<int>() == 1) {
@@ -124,6 +134,9 @@ int main(int argc, char** argv) {
     }
     else if (result["output"].as<int>() == 2) {
         print_option = PRINT_TYPE::STRAIN_ONLY;
+    }
+    else if (result["output"].as<int>() == 3) {
+        print_option = PRINT_TYPE::FAIL_TRACE;
     }
     else {
         print_option = PRINT_TYPE::BOTH;
@@ -137,6 +150,7 @@ int main(int argc, char** argv) {
     // File names
     std::string stress_filename;
     std::string strain_filename;
+    std::string fail_trace_filename;
 
 #ifdef CLUSTER_BUILD
 
@@ -145,17 +159,23 @@ int main(int argc, char** argv) {
             + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + ".txt";
         strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_f=" + std::to_string(FRACTION)
             + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + ".txt";
+        fail_trace_filename = "fail_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_f=" + std::to_string(FRACTION)
+            + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + ".txt";
     }
     else {
         stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_f=" + std::to_string(FRACTION)
             + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + "_taskid=" + std::to_string(TASKID) + ".txt";
         strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_f=" + std::to_string(FRACTION)
             + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + "_taskid=" + std::to_string(TASKID) + ".txt";
+        fail_trace_filename = "fail_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_f=" + std::to_string(FRACTION)
+            + "_e=" + std::to_string(EPSILON) + "_jobid=" + std::to_string(JOBID) + "_taskid=" + std::to_string(TASKID) + ".txt";
     }
 #else
     stress_filename = "stress_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_f=" + std::to_string(FRACTION)
         + "_e=" + std::to_string(EPSILON) + ".txt";
     strain_filename = "strain_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_f=" + std::to_string(FRACTION)
+        + "_e=" + std::to_string(EPSILON) + ".txt";
+    fail_trace_filename = "fail_s=" + std::to_string(AREA) + "_r=" + std::to_string(RATE) + "_f=" + std::to_string(FRACTION)
         + "_e=" + std::to_string(EPSILON) + ".txt";
 
 #endif
@@ -166,6 +186,7 @@ int main(int argc, char** argv) {
     // Output streams, create file if not existed, replace if existed
     stress_file = std::ofstream{ stress_filename, std::ios::out };
     strain_file = std::ofstream{ strain_filename, std::ios::out };
+    fail_trace_file = std::ofstream{ fail_trace_filename, std::ios::out };
 
     /*
     * Technically, these attribute arrays need not be dynamically allocated, but you cannot create normal arrays
@@ -187,7 +208,11 @@ int main(int argc, char** argv) {
         fail_stress[i] = 1;
 
         // Randomly selecting cells to fail
-        if (i < CELL_FAIL_NUMBER) {
+        if (FRACTION == -1)
+        {
+            fail_cells[i] = true;
+        }
+        else if (i < cell_fail_number) {
             fail_cells[uni_int_rand(mt_engine_fail)] = true;
         }
      
@@ -201,7 +226,7 @@ int main(int argc, char** argv) {
         
         double stress_to_fail = 999999; // Minimum stress until the weakest cell fail, initialize to a large number by default
         double redistributed_stress = 0; // Stress to be redistributed
-        int failed_count = 0; // Number of cell failed in a timestep
+        failed_count = 0; // Set failed count to zero at the start of an Avalanche
 
         // If the system is in steady state, "fast forward" to the next avalanche
 //-----------------------------------------------------------------------------

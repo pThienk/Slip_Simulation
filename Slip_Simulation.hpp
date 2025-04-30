@@ -12,7 +12,8 @@
 enum class PRINT_TYPE {
 	BOTH = 0,
 	STRESS_ONLY = 1,
-	STRAIN_ONLY = 2
+	STRAIN_ONLY = 2,
+	FAIL_TRACE = 3
 };
 
 inline void print_to_file();
