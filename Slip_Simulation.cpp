@@ -184,9 +184,13 @@ int main(int argc, char** argv) {
     uni_int_rand = std::uniform_int_distribution<>{ 0, static_cast<int>(AREA - 1) };
 
     // Output streams, create file if not existed, replace if existed
-    stress_file = std::ofstream{ stress_filename, std::ios::out };
-    strain_file = std::ofstream{ strain_filename, std::ios::out };
-    fail_trace_file = std::ofstream{ fail_trace_filename, std::ios::out };
+    if (print_option != PRINT_TYPE::FAIL_TRACE) {
+        stress_file = std::ofstream{ stress_filename, std::ios::out };
+        strain_file = std::ofstream{ strain_filename, std::ios::out };
+    }
+    else {
+        fail_trace_file = std::ofstream{ fail_trace_filename, std::ios::out };
+    }
 
     /*
     * Technically, these attribute arrays need not be dynamically allocated, but you cannot create normal arrays
@@ -321,6 +325,7 @@ int main(int argc, char** argv) {
     // Not technically neccessary, but since the stream objects are static, might as well
     stress_file.close();
     strain_file.close();
+    fail_trace_file.close();
 
     // De-allocate all dynamic variables.
     // !!!VERY IMPORTANT!!!
